@@ -35,15 +35,15 @@ src/modules/<module>/
 
 ### Planned modules
 
-| Module          | Responsibility                                                       |
-| --------------- | -------------------------------------------------------------------- |
-| `identity`      | The owner's account and sessions (one user)                          |
-| `assistant`     | Conversations: speech-to-text, the AI model and its tools            |
-| `agenda`        | The day's events (Google Calendar through the Apps Script endpoint)  |
-| `weather`       | Current weather and forecast (Open-Meteo)                            |
-| `news`          | Headlines collected from RSS feeds                                   |
-| `briefing`      | Morning briefing: agenda + weather + yesterday's news                |
-| `system-logs`   | Errors and failed routines                                           |
+| Module        | Responsibility                                                      |
+| ------------- | ------------------------------------------------------------------- |
+| `identity`    | The owner's account and sessions (one user)                         |
+| `assistant`   | Conversations: speech-to-text, the AI model and its tools           |
+| `agenda`      | The day's events (Google Calendar through the Apps Script endpoint) |
+| `weather`     | Current weather and forecast (Open-Meteo)                           |
+| `news`        | Headlines collected from RSS feeds                                  |
+| `briefing`    | Morning briefing: agenda + weather + yesterday's news               |
+| `system-logs` | Errors and failed routines                                          |
 
 ### Schema
 
@@ -56,21 +56,41 @@ npm run schema:generate   # no database needed
 
 CI fails if the file is outdated (`npm run schema:check`).
 
+## Database
+
+PostgreSQL on **Neon** through TypeORM. The schema only changes through
+migrations (`synchronize` is off), in `src/database/migrations`.
+
+```bash
+npm run migration:run      # applies the pending migrations (.env.local)
+npm run migration:create   # new empty migration
+npm run migration:revert   # undoes the last one
+```
+
+Use Neon's **pooled** connection string (host with `-pooler`): one database
+branch for development and another for production.
+
 ## Running locally
 
 ```bash
 npm install
-cp .env.example .env.local
+cp .env.example .env.local        # fill DATABASE_URL
 npm run secrets:generate          # CLIENT_API_KEY, CRON_SECRET → .env.local
+npm run migration:run
 npm run start:dev                 # http://localhost:4100/graphql
 ```
 
 ## Deploy (Vercel)
 
 Imported on Vercel with the variables from `.env.example` and
-`NODE_ENV=production`. Production deploys run from GitHub Actions after CI
-passes on `master` (added together with the database).
+`NODE_ENV=production`. After CI passes on `master`, the **Deploy Backend**
+workflow runs the migrations on the production database and only then deploys
+to Vercel (migration-first). It is skipped until these repository secrets
+exist: `DATABASE_URL`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
+
+The **Routines** workflow calls `/internal/maintenance/cleanup` every day
+(system logs older than 90 days) once `API_URL` and `CRON_SECRET` are set.
 
 ## Scripts
 
-`npm test` · `npm run lint:check` · `npm run typecheck` · `npm run build` · `npm run schema:generate`
+`npm test` · `npm run lint:check` · `npm run typecheck` · `npm run build` · `npm run schema:generate` · `npm run migration:run`

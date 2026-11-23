@@ -1,0 +1,76 @@
+name: Deploy Backend to Vercel
+
+# Migration-first production deploy: only after CI passes on master, run the
+# pending migrations against the production Neon branch, and only then ship
+# the new code to Vercel, so the code never reaches a database without its
+# schema.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Vercel (Production)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Skip until the deploy secrets exist
+        id: ready
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$VERCEL_TOKEN" ]; then
+            echo "DATABASE_URL/VERCEL_TOKEN not set — skipping the deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run database migrations (production, migration-first)
+        if: steps.ready.outputs.ready == 'true'
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DB_SSL: "true"
+        run: npm run migration:run:prod
+
+      - name: Deploy to Vercel
+        if: steps.ready.outputs.ready == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          DEPLOYED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          npx vercel deploy --prod --token "$VERCEL_TOKEN" --yes \
+            --env APP_VERSION="$VERSION" --env APP_COMMIT_SHA="$COMMIT_SHA" \
+            --env APP_DEPLOYED_AT="$DEPLOYED_AT" --env NODE_ENV=production
