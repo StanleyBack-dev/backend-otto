@@ -116,6 +116,50 @@ type SettingsOutput {
   wakeWordEnabled: Boolean!
 }
 
+type PlaceOutput {
+  name: String!
+
+  """Estado e país, ex.: Goiás, Brasil."""
+  region: String
+  countryCode: String
+  latitude: Float!
+  longitude: Float!
+
+  """Fuso IANA."""
+  timeZone: String
+}
+
+type CurrentWeatherOutput {
+  """Hora local da medição (ISO 8601)."""
+  time: String!
+  temperatureC: Float!
+  feelsLikeC: Float!
+  humidityPercent: Float!
+  precipitationMm: Float!
+  windKmh: Float!
+  isDay: Boolean!
+
+  """Código WMO da condição."""
+  weatherCode: Int!
+}
+
+type DailyForecastOutput {
+  """YYYY-MM-DD no fuso do lugar."""
+  date: String!
+  minC: Float!
+  maxC: Float!
+  precipitationChancePercent: Float
+  precipitationMm: Float!
+  weatherCode: Int!
+}
+
+type WeatherOutput {
+  place: String!
+  timeZone: String!
+  current: CurrentWeatherOutput!
+  days: [DailyForecastOutput!]!
+}
+
 type Query {
   """Verifica se a API GraphQL responde."""
   ping: String!
@@ -134,6 +178,12 @@ type Query {
 
   """Preferências do assistente."""
   mySettings: SettingsOutput!
+
+  """Clima agora e previsão; sem `place`, na sua localização."""
+  weather(place: String, days: Int): WeatherOutput!
+
+  """Busca cidades pelo nome (para escolher a localização)."""
+  searchPlaces(name: String!): [PlaceOutput!]!
 }
 
 input PageInput {

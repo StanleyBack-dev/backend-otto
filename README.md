@@ -86,6 +86,17 @@ CI fails if the file is outdated (`npm run schema:check`).
   only when the answer exists. `myConversations` and
   `conversationMessages` are paged.
 
+## Weather
+
+- **Open-Meteo** (free for non-commercial use, no key; data CC BY 4.0,
+  places from GeoNames).
+- The assistant tool `get_weather` answers "qual o clima agora?", "vai
+  chover amanhã?" and "e em Lisboa?": without a place it uses the last saved
+  location, so moving only changes the settings.
+- `weather(place?, days?)` for the app weather card; `searchPlaces(name)`
+  to pick a city, then `updateMyLocation` saves it.
+- Forecasts are cached in memory for 10 minutes (~1 km grid).
+
 ## Database
 
 PostgreSQL on **Neon** through TypeORM. The schema only changes through

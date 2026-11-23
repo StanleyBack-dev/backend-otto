@@ -105,7 +105,8 @@ export class GeminiLlmAdapter implements LlmPort {
             },
           }
         : {}),
-      generationConfig: { temperature: 0.6, maxOutputTokens: 1024 },
+      // Thinking models count their reasoning in this budget: keep room for it.
+      generationConfig: { temperature: 0.6, maxOutputTokens: 4096 },
     };
 
     let response: Response;
