@@ -2,7 +2,150 @@
 # GENERATED FILE (npm run schema:generate) — do not edit
 # ------------------------------------------------------
 
+type AuthTokensOutput {
+  """O dispositivo (sessão) desta conexão."""
+  deviceId: ID!
+  accessToken: String!
+  accessTokenExpiresAt: DateTime!
+
+  """Guarde com segurança: mantém o dispositivo conectado."""
+  refreshToken: String!
+  refreshTokenExpiresAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type MeOutput {
+  id: ID!
+  name: String!
+  email: String!
+
+  """O dispositivo que fez a requisição."""
+  deviceId: ID!
+}
+
+type DeviceOutput {
+  id: ID!
+  name: String!
+  platform: DevicePlatform!
+  lastSeenAt: DateTime!
+  createdAt: DateTime!
+
+  """É o dispositivo que fez esta requisição."""
+  current: Boolean!
+}
+
+"""Sistema do dispositivo conectado."""
+enum DevicePlatform {
+  WINDOWS
+  MACOS
+  LINUX
+  ANDROID
+  IOS
+  WEB
+}
+
+type LocationOutput {
+  name: String
+  latitude: Float!
+  longitude: Float!
+  updatedAt: DateTime!
+}
+
+type SettingsOutput {
+  assistantName: String!
+  language: String!
+  timeZone: String!
+
+  """Última localização conhecida (null: ainda não informada)."""
+  location: LocationOutput
+  speechRate: Float!
+  autoSpeak: Boolean!
+  wakeWordEnabled: Boolean!
+}
+
 type Query {
   """Verifica se a API GraphQL responde."""
   ping: String!
+
+  """Quem está conectado."""
+  me: MeOutput!
+
+  """Dispositivos conectados."""
+  myDevices: [DeviceOutput!]!
+
+  """Preferências do assistente."""
+  mySettings: SettingsOutput!
+}
+
+type Mutation {
+  """Conecta um dispositivo à conta."""
+  login(input: LoginInput!): AuthTokensOutput!
+
+  """Renova o token de acesso de um dispositivo conectado."""
+  refreshSession(input: RefreshSessionInput!): AuthTokensOutput!
+
+  """Desconecta este dispositivo."""
+  logout: Boolean!
+
+  """Troca a senha e desconecta os outros dispositivos."""
+  changeMyPassword(input: ChangePasswordInput!): Boolean!
+  renameDevice(input: RenameDeviceInput!): DeviceOutput!
+
+  """Desconecta um dispositivo (ex.: celular antigo)."""
+  removeDevice(deviceId: ID!): Boolean!
+  updateMySettings(input: UpdateSettingsInput!): SettingsOutput!
+
+  """Atualiza a localização usada no clima e no resumo do dia."""
+  updateMyLocation(input: UpdateLocationInput!): SettingsOutput!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+
+  """Nome que identifica o dispositivo (ex.: PC do quarto)."""
+  deviceName: String!
+  platform: DevicePlatform!
+}
+
+input RefreshSessionInput {
+  refreshToken: String!
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
+input RenameDeviceInput {
+  deviceId: ID!
+  name: String!
+}
+
+input UpdateSettingsInput {
+  assistantName: String
+
+  """Ex.: pt-BR, en-US."""
+  language: String
+
+  """Fuso IANA, ex.: America/Sao_Paulo."""
+  timeZone: String
+  speechRate: Float
+  autoSpeak: Boolean
+  wakeWordEnabled: Boolean
+}
+
+input UpdateLocationInput {
+  latitude: Float!
+  longitude: Float!
+
+  """Nome do lugar, ex.: Goiânia - GO."""
+  name: String
+
+  """Fuso IANA do dispositivo; quando enviado, passa a valer."""
+  timeZone: String
 }

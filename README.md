@@ -56,6 +56,21 @@ npm run schema:generate   # no database needed
 
 CI fails if the file is outdated (`npm run schema:check`).
 
+## Identity and settings
+
+- **One owner, many devices.** There is no sign-up: the account is created on
+  boot from `BOOTSTRAP_OWNER_*` while the database has no user.
+- Each `login` registers a **device** (desktop app, phone…) with its own
+  refresh token, so the desktop stays signed in on its own. `removeDevice`
+  signs one out at once (e.g. an old phone); changing the password signs out
+  every other device.
+- Every request after login sends `Authorization: Bearer <accessToken>`
+  (15 min) and renews it with `refreshSession` (device kept for 90 days
+  without use, sliding).
+- **Nothing is fixed in the code**: language, time zone, voice speed and the
+  location (`updateMyLocation`, reported by the device or typed) live in
+  `tb_user_settings`. Weather and the briefing read the last known location.
+
 ## Database
 
 PostgreSQL on **Neon** through TypeORM. The schema only changes through

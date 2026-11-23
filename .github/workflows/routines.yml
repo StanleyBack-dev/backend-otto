@@ -3,7 +3,8 @@ name: Routines
 # Scheduled calls to the API's internal routes (Vercel Hobby has no crons).
 # They authenticate with CRON_SECRET; until the API is deployed and the
 # secrets API_URL / CRON_SECRET exist, every run is skipped.
-#   - maintenance: deletes system logs past their retention.
+#   - maintenance: deletes system logs and signed-out devices past their
+#     retention.
 on:
   schedule:
     # GitHub may start scheduled runs a few minutes late; that is fine here.
@@ -42,3 +43,6 @@ jobs:
           curl --fail-with-body --silent --show-error --max-time 120 \
             -X POST -H "Authorization: Bearer $CRON_SECRET" \
             "$API_URL/internal/maintenance/cleanup"
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -X POST -H "Authorization: Bearer $CRON_SECRET" \
+            "$API_URL/internal/identity/cleanup"
