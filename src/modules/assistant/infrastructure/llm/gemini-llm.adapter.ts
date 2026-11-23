@@ -9,7 +9,8 @@ import {
 } from "@/modules/assistant/application/ports/llm.port";
 
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-const TIMEOUT_MS = 25_000;
+// Two calls (tool round + answer) must fit in the 60 s Vercel function.
+const TIMEOUT_MS = 30_000;
 
 type GeminiPart = {
   text?: string;

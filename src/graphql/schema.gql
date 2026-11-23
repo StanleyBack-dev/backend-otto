@@ -2,6 +2,34 @@
 # GENERATED FILE (npm run schema:generate) — do not edit
 # ------------------------------------------------------
 
+type AgendaEventOutput {
+  id: ID!
+  title: String!
+  start: DateTime!
+  end: DateTime!
+  allDay: Boolean!
+  location: String
+  description: String
+
+  """Agenda do evento (ex.: Rotina de Estudos)."""
+  calendar: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type AgendaOutput {
+  """Primeiro dia (YYYY-MM-DD)."""
+  from: String!
+
+  """Último dia (YYYY-MM-DD)."""
+  to: String!
+  timeZone: String!
+  events: [AgendaEventOutput!]!
+}
+
 type ConversationOutput {
   id: ID!
   title: String!
@@ -10,11 +38,6 @@ type ConversationOutput {
   """Último uso."""
   updatedAt: DateTime!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type ConversationPage {
   items: [ConversationOutput!]!
@@ -163,6 +186,13 @@ type WeatherOutput {
 type Query {
   """Verifica se a API GraphQL responde."""
   ping: String!
+
+  """Compromissos de um ou mais dias (padrão: hoje)."""
+  agenda(
+    """YYYY-MM-DD"""
+    date: String
+    days: Int
+  ): AgendaOutput!
 
   """Conversas, da mais recente para a mais antiga."""
   myConversations(page: PageInput): ConversationPage!
