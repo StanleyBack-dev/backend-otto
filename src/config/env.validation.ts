@@ -28,4 +28,22 @@ export const envValidationSchema = Joi.object({
   // `Authorization: Bearer <CRON_SECRET>`. When unset, /internal/* rejects
   // every request.
   CRON_SECRET: Joi.string().min(16).allow("").optional(),
+
+  // === AUTH ===
+  // Signs the short-lived access tokens.
+  JWT_ACCESS_SECRET: Joi.string().min(32).required(),
+  JWT_ACCESS_EXPIRES_IN: Joi.string().default("15m"),
+  // Days a device stays signed in without use (slides on every refresh).
+  REFRESH_TOKEN_TTL_DAYS: Joi.number().integer().min(1).max(365).default(90),
+  // HMAC key for the refresh secrets (only digests are stored). Rotating it
+  // signs every device out.
+  AUTH_HASH_SECRET: Joi.string().min(32).required(),
+  AUTH_MAX_FAILED_ATTEMPTS: Joi.number().integer().min(3).max(20).default(5),
+  AUTH_LOCK_MINUTES: Joi.number().integer().min(1).max(1440).default(15),
+
+  // Owner account, created on boot while the database has no user.
+  BOOTSTRAP_OWNER_ENABLED: bool().default(false),
+  BOOTSTRAP_OWNER_NAME: Joi.string().allow("").optional(),
+  BOOTSTRAP_OWNER_EMAIL: Joi.string().email().allow("").optional(),
+  BOOTSTRAP_OWNER_PASSWORD: Joi.string().allow("").optional(),
 });
