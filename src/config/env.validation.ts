@@ -50,6 +50,14 @@ export const envValidationSchema = Joi.object({
   ASSISTANT_HISTORY_MESSAGES: Joi.number().integer().min(0).max(50).default(12),
   ASSISTANT_MAX_TOOL_ROUNDS: Joi.number().integer().min(1).max(8).default(4),
 
+  // === AGENDA (Google Calendar via Apps Script) ===
+  // Web app URL (.../exec) and token from otto-agenda.gs. Empty = agenda off.
+  AGENDA_SCRIPT_URL: Joi.string()
+    .uri({ scheme: ["https"] })
+    .allow("")
+    .optional(),
+  AGENDA_SCRIPT_TOKEN: Joi.string().min(32).allow("").optional(),
+
   // Owner account, created on boot while the database has no user.
   BOOTSTRAP_OWNER_ENABLED: bool().default(false),
   BOOTSTRAP_OWNER_NAME: Joi.string().allow("").optional(),

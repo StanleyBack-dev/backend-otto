@@ -97,6 +97,20 @@ CI fails if the file is outdated (`npm run schema:check`).
   to pick a city, then `updateMyLocation` saves it.
 - Forecasts are cached in memory for 10 minutes (~1 km grid).
 
+## Agenda
+
+- Google Calendar through the owner's **Apps Script web app**
+  (`integrations/google-apps-script/otto-agenda.gs`, install steps at the
+  top of the file). It runs as the owner, so there is no Google Cloud OAuth
+  to renew; `AGENDA_SCRIPT_TOKEN` is the credential and
+  `AGENDA_SCRIPT_URL` the `/exec` URL. Changing accounts is publishing the
+  script there and changing both variables.
+- The assistant tool `get_agenda` answers "o que tenho hoje?", "qual o
+  próximo compromisso?", "e amanhã?" with local times in the owner's time
+  zone, plus what is happening now and the next event.
+- `agenda(date?, days?)` for the app agenda screen (up to 7 days, cached
+  for 2 minutes).
+
 ## Database
 
 PostgreSQL on **Neon** through TypeORM. The schema only changes through
