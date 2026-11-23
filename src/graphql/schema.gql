@@ -1,0 +1,8 @@
+# ------------------------------------------------------
+# GENERATED FILE (npm run schema:generate) — do not edit
+# ------------------------------------------------------
+
+type Query {
+  """Verifica se a API GraphQL responde."""
+  ping: String!
+}
