@@ -71,6 +71,21 @@ CI fails if the file is outdated (`npm run schema:check`).
   location (`updateMyLocation`, reported by the device or typed) live in
   `tb_user_settings`. Weather and the briefing read the last known location.
 
+## Assistant
+
+- `ask(text, conversationId?)` sends the question (typed or transcribed) with
+  the last messages of the conversation and the owner settings (name,
+  language, time zone, place) to the AI model, behind `LlmPort`.
+- **Gemini** (Google AI Studio, REST `generateContent`) today:
+  `GEMINI_API_KEY` and `GEMINI_MODEL` (check which models the free tier
+  covers in AI Studio). Another provider is a new adapter.
+- **Tools**: feature modules register an `AssistantTool` in the
+  `AssistantToolRegistry` (weather, agenda, news); the model calls them and
+  a failing tool never breaks the answer.
+- Only the text turns are stored (`tb_conversations`, `tb_messages`), and
+  only when the answer exists. `myConversations` and
+  `conversationMessages` are paged.
+
 ## Database
 
 PostgreSQL on **Neon** through TypeORM. The schema only changes through

@@ -2,6 +2,60 @@
 # GENERATED FILE (npm run schema:generate) — do not edit
 # ------------------------------------------------------
 
+type ConversationOutput {
+  id: ID!
+  title: String!
+  createdAt: DateTime!
+
+  """Último uso."""
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type ConversationPage {
+  items: [ConversationOutput!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  totalPages: Int!
+}
+
+type MessageOutput {
+  id: ID!
+  role: MessageRole!
+  text: String!
+  createdAt: DateTime!
+}
+
+"""Quem disse a mensagem."""
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+type MessagePage {
+  items: [MessageOutput!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  totalPages: Int!
+}
+
+type AskResultOutput {
+  conversation: ConversationOutput!
+  question: MessageOutput!
+
+  """A resposta, pronta para falar."""
+  answer: MessageOutput!
+
+  """Ferramentas consultadas (clima, agenda…)."""
+  toolsUsed: [String!]!
+}
+
 type AuthTokensOutput {
   """O dispositivo (sessão) desta conexão."""
   deviceId: ID!
@@ -12,11 +66,6 @@ type AuthTokensOutput {
   refreshToken: String!
   refreshTokenExpiresAt: DateTime!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type MeOutput {
   id: ID!
@@ -71,6 +120,12 @@ type Query {
   """Verifica se a API GraphQL responde."""
   ping: String!
 
+  """Conversas, da mais recente para a mais antiga."""
+  myConversations(page: PageInput): ConversationPage!
+
+  """Mensagens de uma conversa."""
+  conversationMessages(conversationId: ID!, page: PageInput): MessagePage!
+
   """Quem está conectado."""
   me: MeOutput!
 
@@ -81,7 +136,16 @@ type Query {
   mySettings: SettingsOutput!
 }
 
+input PageInput {
+  page: Int! = 1
+  limit: Int! = 20
+}
+
 type Mutation {
+  """Faz uma pergunta ao assistente."""
+  ask(input: AskInput!): AskResultOutput!
+  deleteConversation(conversationId: ID!): Boolean!
+
   """Conecta um dispositivo à conta."""
   login(input: LoginInput!): AuthTokensOutput!
 
@@ -101,6 +165,14 @@ type Mutation {
 
   """Atualiza a localização usada no clima e no resumo do dia."""
   updateMyLocation(input: UpdateLocationInput!): SettingsOutput!
+}
+
+input AskInput {
+  """A pergunta, digitada ou transcrita da voz."""
+  text: String!
+
+  """Continua uma conversa; sem ele, começa uma nova."""
+  conversationId: ID
 }
 
 input LoginInput {
