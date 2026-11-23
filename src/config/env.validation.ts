@@ -1,5 +1,7 @@
 import * as Joi from "joi";
 
+const bool = () => Joi.boolean().truthy("true").falsy("false");
+
 export const envValidationSchema = Joi.object({
   // === APP ===
   NODE_ENV: Joi.string()
@@ -11,6 +13,13 @@ export const envValidationSchema = Joi.object({
   APP_VERSION: Joi.string().allow("").optional(),
   APP_COMMIT_SHA: Joi.string().allow("").optional(),
   APP_DEPLOYED_AT: Joi.string().allow("").optional(),
+
+  // === DATABASE (Neon) ===
+  DATABASE_URL: Joi.string()
+    .uri({ scheme: ["postgres", "postgresql"] })
+    .required(),
+  DB_SSL: bool().default(true),
+  TYPEORM_LOGGING: bool().default(false),
 
   // === SERVICE SECRETS ===
   // Shared secret between the Otto clients (desktop app) and this API.
