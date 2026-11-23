@@ -41,6 +41,15 @@ export const envValidationSchema = Joi.object({
   AUTH_MAX_FAILED_ATTEMPTS: Joi.number().integer().min(3).max(20).default(5),
   AUTH_LOCK_MINUTES: Joi.number().integer().min(1).max(1440).default(15),
 
+  // === ASSISTANT (AI model) ===
+  // Google AI Studio key. Empty = the API runs, but questions fail with
+  // ASSISTANT_UNAVAILABLE.
+  GEMINI_API_KEY: Joi.string().allow("").optional(),
+  // Model id; check the current free-tier models in Google AI Studio.
+  GEMINI_MODEL: Joi.string().default("gemini-3.5-flash-lite"),
+  ASSISTANT_HISTORY_MESSAGES: Joi.number().integer().min(0).max(50).default(12),
+  ASSISTANT_MAX_TOOL_ROUNDS: Joi.number().integer().min(1).max(8).default(4),
+
   // Owner account, created on boot while the database has no user.
   BOOTSTRAP_OWNER_ENABLED: bool().default(false),
   BOOTSTRAP_OWNER_NAME: Joi.string().allow("").optional(),
