@@ -2,6 +2,7 @@ import type { AppErrorDefinition } from "@/common/exceptions/app-error-definitio
 import { assistantErrors } from "@/common/exceptions/catalogs/assistant-errors.catalog";
 import { authErrors } from "@/common/exceptions/catalogs/auth-errors.catalog";
 import { identityErrors } from "@/common/exceptions/catalogs/identity-errors.catalog";
+import { weatherErrors } from "@/common/exceptions/catalogs/weather-errors.catalog";
 
 // One catalog per area (common/exceptions/catalogs). Messages are
 // user-facing, so they are written in Portuguese.
@@ -9,4 +10,5 @@ export const APP_ERRORS = {
   auth: authErrors,
   assistant: assistantErrors,
   identity: identityErrors,
+  weather: weatherErrors,
 } as const satisfies Record<string, Record<string, AppErrorDefinition<never>>>;

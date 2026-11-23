@@ -147,6 +147,7 @@ export class AskAssistantUseCase {
       return answer;
     } catch (error) {
       if (!(error instanceof LlmError)) throw error;
+      this.logger.warn(`Model failed (${error.reason}): ${error.message}`);
       if (error.reason !== "QUOTA") {
         reportSystemEvent({
           level: "ERROR",
