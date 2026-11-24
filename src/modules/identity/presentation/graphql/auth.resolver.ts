@@ -6,9 +6,11 @@ import { ChangeOwnPasswordUseCase } from "@/modules/identity/application/use-cas
 import { LoginUseCase } from "@/modules/identity/application/use-cases/login.use-case";
 import { ManageDevicesUseCase } from "@/modules/identity/application/use-cases/manage-devices.use-case";
 import { RefreshSessionUseCase } from "@/modules/identity/application/use-cases/refresh-session.use-case";
+import { UpdateOwnProfileUseCase } from "@/modules/identity/application/use-cases/update-own-profile.use-case";
 import { ChangePasswordInput } from "@/modules/identity/presentation/graphql/dto/inputs/change-password.input";
 import { LoginInput } from "@/modules/identity/presentation/graphql/dto/inputs/login.input";
 import { RefreshSessionInput } from "@/modules/identity/presentation/graphql/dto/inputs/refresh-session.input";
+import { UpdateProfileInput } from "@/modules/identity/presentation/graphql/dto/inputs/update-profile.input";
 import { AuthTokensOutput } from "@/modules/identity/presentation/graphql/dto/outputs/auth-tokens.output";
 import { MeOutput } from "@/modules/identity/presentation/graphql/dto/outputs/me.output";
 
@@ -19,6 +21,7 @@ export class AuthResolver {
     private readonly refreshUseCase: RefreshSessionUseCase,
     private readonly devices: ManageDevicesUseCase,
     private readonly changePassword: ChangeOwnPasswordUseCase,
+    private readonly updateProfile: UpdateOwnProfileUseCase,
   ) {}
 
   @Public()
@@ -65,11 +68,25 @@ export class AuthResolver {
 
   @Query(() => MeOutput, { description: "Quem está conectado." })
   me(@CurrentUser() user: AuthenticatedUser): MeOutput {
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      deviceId: user.deviceId,
-    };
+    return toMeOutput(user);
   }
+
+  @Mutation(() => MeOutput, {
+    description: "Muda o seu nome (como o assistente chama você).",
+  })
+  async updateMyProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args("input") input: UpdateProfileInput,
+  ): Promise<MeOutput> {
+    return toMeOutput(await this.updateProfile.execute(user, input));
+  }
+}
+
+function toMeOutput(user: AuthenticatedUser): MeOutput {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    deviceId: user.deviceId,
+  };
 }

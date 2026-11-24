@@ -17,6 +17,7 @@ import { LoginUseCase } from "@/modules/identity/application/use-cases/login.use
 import { ManageDevicesUseCase } from "@/modules/identity/application/use-cases/manage-devices.use-case";
 import { MySettingsUseCase } from "@/modules/identity/application/use-cases/my-settings.use-case";
 import { RefreshSessionUseCase } from "@/modules/identity/application/use-cases/refresh-session.use-case";
+import { UpdateOwnProfileUseCase } from "@/modules/identity/application/use-cases/update-own-profile.use-case";
 import { JwtAccessTokenService } from "@/modules/identity/infrastructure/crypto/jwt-access-token.service";
 import { NodeSecrets } from "@/modules/identity/infrastructure/crypto/node-secrets";
 import { ScryptPasswordHasher } from "@/modules/identity/infrastructure/crypto/scrypt-password-hasher";
@@ -55,6 +56,7 @@ import { InternalIdentityController } from "@/modules/identity/presentation/http
     ManageDevicesUseCase,
     MySettingsUseCase,
     RefreshSessionUseCase,
+    UpdateOwnProfileUseCase,
     UserSessionGuard,
     AuthResolver,
     DevicesResolver,

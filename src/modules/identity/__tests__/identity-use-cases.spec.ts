@@ -10,6 +10,7 @@ import { ChangeOwnPasswordUseCase } from "@/modules/identity/application/use-cas
 import { LoginUseCase } from "@/modules/identity/application/use-cases/login.use-case";
 import { ManageDevicesUseCase } from "@/modules/identity/application/use-cases/manage-devices.use-case";
 import { RefreshSessionUseCase } from "@/modules/identity/application/use-cases/refresh-session.use-case";
+import { UpdateOwnProfileUseCase } from "@/modules/identity/application/use-cases/update-own-profile.use-case";
 import { DevicePlatform, type Device } from "@/modules/identity/domain/device";
 import type { Credential, User } from "@/modules/identity/domain/user";
 import { JwtAccessTokenService } from "@/modules/identity/infrastructure/crypto/jwt-access-token.service";
@@ -63,6 +64,11 @@ class InMemoryUsers implements UserRepositoryPort {
     return Promise.resolve();
   }
   touchLastLogin = () => Promise.resolve();
+  updateName(id: string, name: string) {
+    const user = this.users.get(id);
+    if (user) this.users.set(id, { ...user, name });
+    return Promise.resolve();
+  }
 }
 
 class InMemoryDevices implements DeviceRepositoryPort {
@@ -314,5 +320,25 @@ describe("identity use cases", () => {
     expect(
       codeOf(await t.refresh.execute(pc.refreshToken).catch((e) => e)),
     ).toBe("IDENTITY_REFRESH_INVALID");
+  });
+});
+
+describe("UpdateOwnProfileUseCase", () => {
+  it("renames the owner and refuses an empty name", async () => {
+    const t = await setup();
+    const pc = await t.login.execute({
+      email: "owner@example.com",
+      password: PASSWORD,
+      ...desktop,
+    });
+    const caller = await t.authenticate.execute(pc.accessToken);
+    const update = new UpdateOwnProfileUseCase(t.users);
+    await expect(
+      update.execute(caller, { name: "  Stanley  Rodrigues " }),
+    ).resolves.toMatchObject({ name: "Stanley Rodrigues" });
+    expect(t.users.users.get(t.owner.id)?.name).toBe("Stanley Rodrigues");
+    expect(
+      codeOf(await update.execute(caller, { name: " " }).catch((e) => e)),
+    ).toBe("IDENTITY_INVALID_SETTINGS");
   });
 });

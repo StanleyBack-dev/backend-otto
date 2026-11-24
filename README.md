@@ -105,7 +105,8 @@ CI fails if the file is outdated (`npm run schema:check`).
   location, so moving only changes the settings.
 - `weather(place?, days?)` for the app weather card; `searchPlaces(name)`
   to pick a city, then `updateMyLocation` saves it.
-- Forecasts are cached in memory for 10 minutes (~1 km grid).
+- Forecasts are cached in memory for 10 minutes (~1 km grid). A timeout,
+  network or 5xx error is retried once (6 s each); a bad request is not.
 
 ## Agenda
 
@@ -148,6 +149,11 @@ CI fails if the file is outdated (`npm run schema:check`).
 - `todayBriefing` (generated on demand if the routine has not run yet),
   `regenerateBriefing` and the paged `myBriefings`; the assistant tool
   `get_briefing` answers "bom dia" and "qual o resumo de hoje?".
+
+## Profile
+
+- `updateMyProfile(name)`: the owner's name, used by the assistant and the
+  briefing ("Bom dia, Stanley").
 
 ## Database
 
