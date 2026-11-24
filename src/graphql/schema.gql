@@ -139,6 +139,42 @@ type SettingsOutput {
   wakeWordEnabled: Boolean!
 }
 
+type NewsItemOutput {
+  id: ID!
+  title: String!
+  link: String!
+  summary: String
+  publishedAt: DateTime!
+  sourceName: String!
+  category: String!
+}
+
+type NewsItemPage {
+  items: [NewsItemOutput!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  totalPages: Int!
+}
+
+type NewsSourceOutput {
+  id: ID!
+  name: String!
+  url: String!
+  category: String!
+  active: Boolean!
+  lastFetchedAt: DateTime
+
+  """Erro da última leitura (null: leu bem)."""
+  lastError: String
+}
+
+type SuggestedNewsSourceOutput {
+  name: String!
+  url: String!
+  category: String!
+}
+
 type PlaceOutput {
   name: String!
 
@@ -209,6 +245,15 @@ type Query {
   """Preferências do assistente."""
   mySettings: SettingsOutput!
 
+  """Manchetes das suas fontes, da mais nova para a mais antiga."""
+  news(period: NewsPeriod, category: String, page: PageInput): NewsItemPage!
+
+  """Fontes que você segue."""
+  newsSources: [NewsSourceOutput!]!
+
+  """Sugestões de feeds para começar."""
+  suggestedNewsSources: [SuggestedNewsSourceOutput!]!
+
   """Clima agora e previsão; sem `place`, na sua localização."""
   weather(place: String, days: Int): WeatherOutput!
 
@@ -219,6 +264,13 @@ type Query {
 input PageInput {
   page: Int! = 1
   limit: Int! = 20
+}
+
+"""Hoje (desde a meia-noite), ontem ou as últimas 24 horas."""
+enum NewsPeriod {
+  TODAY
+  YESTERDAY
+  RECENT
 }
 
 type Mutation {
@@ -245,6 +297,11 @@ type Mutation {
 
   """Atualiza a localização usada no clima e no resumo do dia."""
   updateMyLocation(input: UpdateLocationInput!): SettingsOutput!
+
+  """Segue um feed RSS/Atom (o endereço é conferido na hora)."""
+  addNewsSource(input: AddNewsSourceInput!): NewsSourceOutput!
+  updateNewsSource(input: UpdateNewsSourceInput!): NewsSourceOutput!
+  removeNewsSource(id: ID!): Boolean!
 }
 
 input AskInput {
@@ -300,4 +357,24 @@ input UpdateLocationInput {
 
   """Fuso IANA do dispositivo; quando enviado, passa a valer."""
   timeZone: String
+}
+
+input AddNewsSourceInput {
+  """Endereço do feed RSS ou Atom."""
+  url: String!
+
+  """Ex.: geral, tecnologia, economia, Goiânia."""
+  category: String!
+
+  """Sem ele, usa o título do feed."""
+  name: String
+}
+
+input UpdateNewsSourceInput {
+  id: ID!
+  name: String
+  category: String
+
+  """false pausa a coleta da fonte."""
+  active: Boolean
 }

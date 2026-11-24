@@ -1,3 +1,4 @@
+import { newsErrors } from "@/common/exceptions/catalogs/news-errors.catalog";
 import { agendaErrors } from "@/common/exceptions/catalogs/agenda-errors.catalog";
 import type { AppErrorDefinition } from "@/common/exceptions/app-error-definition.type";
 import { assistantErrors } from "@/common/exceptions/catalogs/assistant-errors.catalog";
@@ -12,5 +13,6 @@ export const APP_ERRORS = {
   assistant: assistantErrors,
   identity: identityErrors,
   agenda: agendaErrors,
+  news: newsErrors,
   weather: weatherErrors,
 } as const satisfies Record<string, Record<string, AppErrorDefinition<never>>>;

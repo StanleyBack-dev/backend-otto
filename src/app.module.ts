@@ -14,6 +14,7 @@ import { AssistantModule } from "@/modules/assistant/assistant.module";
 import { IdentityModule } from "@/modules/identity/identity.module";
 import { UserSessionGuard } from "@/modules/identity/presentation/guards/user-session.guard";
 import { WeatherModule } from "@/modules/weather/weather.module";
+import { NewsModule } from "@/modules/news/news.module";
 import { SystemLogsModule } from "@/modules/system-logs/system-logs.module";
 import { SharedModule } from "@/shared/shared.module";
 
@@ -29,6 +30,7 @@ import { SharedModule } from "@/shared/shared.module";
     AssistantModule,
     WeatherModule,
     AgendaModule,
+    NewsModule,
   ],
   providers: [
     AppResolver,
