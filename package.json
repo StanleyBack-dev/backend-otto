@@ -1,6 +1,6 @@
 {
   "name": "backend-otto",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Otto backend — personal voice assistant (agenda, weather, news and questions)",
   "author": "Stanley Rodrigues",
   "private": true,

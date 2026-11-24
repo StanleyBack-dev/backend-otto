@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/StanleyBack-dev/backend-otto/compare/v0.2.0...v0.3.0) (2026-11-24)
+
+
+### Features
+
+* **assistant:** ask by voice ([2cb61d2](https://github.com/StanleyBack-dev/backend-otto/commit/2cb61d20f6bbe3a370d758ebf7ea8a2b03a378b3))
+* **assistant:** ask the assistant by voice ([34a11c3](https://github.com/StanleyBack-dev/backend-otto/commit/34a11c3dd617347901945e1e7ab5fca50ede4149))
+* **assistant:** ask the assistant by voice ([b8b6e30](https://github.com/StanleyBack-dev/backend-otto/commit/b8b6e305f6a989c49ee47d002b3f53e8c2d2007c))
+* **identity:** rename the owner and retry the weather ([aa530f8](https://github.com/StanleyBack-dev/backend-otto/commit/aa530f8529ef66a24fcf37990fdb07f38f5f968a))
+* **identity:** rename the owner and retry the weather once ([d063f11](https://github.com/StanleyBack-dev/backend-otto/commit/d063f112306dcfe118833d9459b1adf267c3122b))
+* **identity:** rename the owner and retry the weather once ([e3ac71b](https://github.com/StanleyBack-dev/backend-otto/commit/e3ac71bbae69649e2d6147b3c0d716713b3d130b))
+
 ## [0.2.0](https://github.com/StanleyBack-dev/backend-otto/compare/v0.1.0...v0.2.0) (2026-11-24)
 
 
