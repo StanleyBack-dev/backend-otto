@@ -4,12 +4,15 @@ import type { AuthenticatedUser } from "@/common/auth/authenticated-user";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { PageInput } from "@/common/graphql/pagination.graphql";
 import { AskAssistantUseCase } from "@/modules/assistant/application/use-cases/ask-assistant.use-case";
+import { AskByVoiceUseCase } from "@/modules/assistant/application/use-cases/ask-by-voice.use-case";
 import { MyConversationsUseCase } from "@/modules/assistant/application/use-cases/my-conversations.use-case";
+import { AskByVoiceInput } from "@/modules/assistant/presentation/graphql/dto/inputs/ask-by-voice.input";
 import { AskInput } from "@/modules/assistant/presentation/graphql/dto/inputs/ask.input";
 import { AskResultOutput } from "@/modules/assistant/presentation/graphql/dto/outputs/ask-result.output";
 import { ConversationPage } from "@/modules/assistant/presentation/graphql/dto/outputs/conversation.output";
 import { MessagePage } from "@/modules/assistant/presentation/graphql/dto/outputs/message.output";
 import {
+  toAskResultOutput,
   toConversationOutput,
   toMessageOutput,
 } from "@/modules/assistant/presentation/graphql/mappers/conversation.mapper";
@@ -18,6 +21,7 @@ import {
 export class AssistantResolver {
   constructor(
     private readonly askAssistant: AskAssistantUseCase,
+    private readonly askByVoiceUseCase: AskByVoiceUseCase,
     private readonly conversations: MyConversationsUseCase,
   ) {}
 
@@ -28,13 +32,18 @@ export class AssistantResolver {
     @CurrentUser() user: AuthenticatedUser,
     @Args("input") input: AskInput,
   ): Promise<AskResultOutput> {
-    const result = await this.askAssistant.execute(user, input);
-    return {
-      conversation: toConversationOutput(result.conversation),
-      question: toMessageOutput(result.question),
-      answer: toMessageOutput(result.answer),
-      toolsUsed: result.toolsUsed,
-    };
+    return toAskResultOutput(await this.askAssistant.execute(user, input));
+  }
+
+  @Mutation(() => AskResultOutput, {
+    description:
+      "Pergunta falada: o áudio é transcrito (question.text) e respondido.",
+  })
+  async askByVoice(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args("input") input: AskByVoiceInput,
+  ): Promise<AskResultOutput> {
+    return toAskResultOutput(await this.askByVoiceUseCase.execute(user, input));
   }
 
   @Query(() => ConversationPage, {

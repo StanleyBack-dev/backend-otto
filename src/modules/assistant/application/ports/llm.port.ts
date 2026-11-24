@@ -27,7 +27,9 @@ export type LlmRequest = {
 
 export type LlmAnswer = { text: string; toolsUsed: string[] };
 
-export type LlmFailure = "NOT_CONFIGURED" | "QUOTA" | "UNAVAILABLE";
+/** INVALID_INPUT: the model refused the content (e.g. unreadable audio). */
+export type LlmFailure =
+  "NOT_CONFIGURED" | "QUOTA" | "INVALID_INPUT" | "UNAVAILABLE";
 
 export class LlmError extends Error {
   constructor(
@@ -42,6 +44,16 @@ export class LlmError extends Error {
 export interface LlmPort {
   /** Throws LlmError when the model cannot answer. */
   chat(request: LlmRequest): Promise<LlmAnswer>;
+  /**
+   * What was said in a short recording ("" when there is no speech).
+   * Throws LlmError when the model cannot answer.
+   */
+  transcribe(
+    audio: { base64: string; mimeType: string },
+    language: string,
+    /** Names likely to be said (the assistant name), spelled right. */
+    vocabulary?: string[],
+  ): Promise<string>;
 }
 
 export const LLM = Symbol("LLM");

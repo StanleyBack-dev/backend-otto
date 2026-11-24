@@ -119,7 +119,7 @@ function setup(options: {
   } as unknown as GetNewsUseCase;
   const generator = new GenerateBriefingUseCase(
     briefings,
-    { chat },
+    { chat, transcribe: jest.fn() },
     clock,
     settings,
     users,

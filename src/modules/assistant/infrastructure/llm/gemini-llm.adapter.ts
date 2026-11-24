@@ -7,6 +7,7 @@ import {
   type LlmPort,
   type LlmRequest,
 } from "@/modules/assistant/application/ports/llm.port";
+import { NO_SPEECH_MARK } from "@/modules/assistant/domain/voice-audio";
 
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 // Two calls (tool round + answer) must fit in the 60 s Vercel function.
@@ -14,6 +15,7 @@ const TIMEOUT_MS = 30_000;
 
 type GeminiPart = {
   text?: string;
+  inlineData?: { mimeType: string; data: string };
   thought?: boolean;
   thoughtSignature?: string;
   functionCall?: { id?: string; name: string; args?: Record<string, unknown> };
@@ -109,7 +111,50 @@ export class GeminiLlmAdapter implements LlmPort {
       // Thinking models count their reasoning in this budget: keep room for it.
       generationConfig: { temperature: 0.6, maxOutputTokens: 4096 },
     };
+    return this.post(body);
+  }
 
+  async transcribe(
+    audio: { base64: string; mimeType: string },
+    language: string,
+    vocabulary: string[] = [],
+  ): Promise<string> {
+    const names = vocabulary.filter(Boolean).join(", ");
+    if (!this.apiKey) {
+      throw new LlmError("NOT_CONFIGURED", "GEMINI_API_KEY is not set.");
+    }
+    const content = await this.post({
+      systemInstruction: {
+        parts: [
+          {
+            text: `Transcribe the speech in the audio exactly as said, in its language (usually ${language}). Return only the transcript as plain text, with punctuation.${names ? ` Words that may be said, spell them like this: ${names}.` : ""} Never guess or invent words: if there is no intelligible speech (silence, noise, music), answer exactly ${NO_SPEECH_MARK}.`,
+          },
+        ],
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { inlineData: { mimeType: audio.mimeType, data: audio.base64 } },
+          ],
+        },
+      ],
+      generationConfig: { temperature: 0, maxOutputTokens: 2048 },
+    }).catch((error: unknown) => {
+      // No candidate text at all means nothing was heard.
+      if (error instanceof LlmError && error.message.startsWith("Empty")) {
+        return { role: "model" as const, parts: [] };
+      }
+      throw error;
+    });
+    return content.parts
+      .filter((part) => part.text && !part.thought)
+      .map((part) => part.text)
+      .join("")
+      .trim();
+  }
+
+  private async post(body: Record<string, unknown>): Promise<GeminiContent> {
     let response: Response;
     try {
       response = await fetch(`${API_URL}/${this.model}:generateContent`, {
@@ -141,6 +186,14 @@ export class GeminiLlmAdapter implements LlmPort {
         /API_KEY|API key/i.test(payload.error?.message ?? "")
       ) {
         throw new LlmError("NOT_CONFIGURED", detail);
+      }
+      if (
+        response.status === 400 &&
+        /media|file|audio|unable to process input/i.test(
+          payload.error?.message ?? "",
+        )
+      ) {
+        throw new LlmError("INVALID_INPUT", detail);
       }
       throw new LlmError("UNAVAILABLE", detail);
     }
