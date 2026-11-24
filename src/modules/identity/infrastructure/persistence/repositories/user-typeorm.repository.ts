@@ -81,6 +81,10 @@ export class UserTypeormRepository implements UserRepositoryPort {
     await this.users.update({ id: userId }, change);
   }
 
+  async updateName(userId: string, name: string): Promise<void> {
+    await this.users.update({ id: userId }, { name });
+  }
+
   async touchLastLogin(userId: string, at: Date): Promise<void> {
     await this.users.update({ id: userId }, { lastLoginAt: at });
   }

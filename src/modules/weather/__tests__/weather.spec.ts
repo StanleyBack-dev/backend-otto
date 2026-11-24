@@ -224,4 +224,54 @@ describe("OpenMeteoAdapter", () => {
       ),
     ).rejects.toBeInstanceOf(WeatherProviderError);
   });
+
+  it("tries once more when the service is slow or failing", async () => {
+    const ok = {
+      timezone: "UTC",
+      current: { time: "2026-11-24T12:00", weather_code: 0 },
+      daily: {
+        time: [],
+        weather_code: [],
+        temperature_2m_max: [],
+        temperature_2m_min: [],
+        precipitation_probability_max: [],
+        precipitation_sum: [],
+      },
+    };
+    const fetchMock = jest
+      .spyOn(global, "fetch")
+      .mockImplementationOnce(() => Promise.reject(new Error("timeout")))
+      .mockImplementationOnce(() => json(200, ok));
+    const forecast = await new OpenMeteoAdapter().forecast(
+      { latitude: 0, longitude: 0 },
+      { days: 1, timeZone: "UTC" },
+    );
+    expect(forecast.timeZone).toBe("UTC");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    jest.restoreAllMocks();
+    const twice = jest
+      .spyOn(global, "fetch")
+      .mockImplementation(() => json(503, {}));
+    await expect(
+      new OpenMeteoAdapter().forecast(
+        { latitude: 0, longitude: 0 },
+        { days: 1, timeZone: "UTC" },
+      ),
+    ).rejects.toBeInstanceOf(WeatherProviderError);
+    expect(twice).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry a bad request", async () => {
+    const fetchMock = jest
+      .spyOn(global, "fetch")
+      .mockImplementation(() => json(400, { error: true, reason: "bad" }));
+    await expect(
+      new OpenMeteoAdapter().forecast(
+        { latitude: 0, longitude: 0 },
+        { days: 1, timeZone: "UTC" },
+      ),
+    ).rejects.toBeInstanceOf(WeatherProviderError);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });

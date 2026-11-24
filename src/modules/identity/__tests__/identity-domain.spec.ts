@@ -3,6 +3,7 @@ import {
   normalizeDeviceName,
 } from "@/modules/identity/domain/device";
 import { checkPassword } from "@/modules/identity/domain/password-policy";
+import { normalizeName } from "@/modules/identity/domain/user";
 import {
   composeRefreshToken,
   parseRefreshToken,
@@ -139,5 +140,13 @@ describe("settings", () => {
         NOW,
       ),
     ).toThrow(InvalidSettingsError);
+  });
+});
+
+describe("normalizeName", () => {
+  it("trims and limits the owner name", () => {
+    expect(normalizeName("  Stanley   Rodrigues ")).toBe("Stanley Rodrigues");
+    expect(normalizeName("A")).toBeNull();
+    expect(normalizeName("x".repeat(121))).toBeNull();
   });
 });

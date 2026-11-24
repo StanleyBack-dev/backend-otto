@@ -13,6 +13,7 @@ export interface UserRepositoryPort {
   findCredential(userId: string): Promise<Credential | null>;
   updateCredential(userId: string, change: Partial<Credential>): Promise<void>;
   touchLastLogin(userId: string, at: Date): Promise<void>;
+  updateName(userId: string, name: string): Promise<void>;
 }
 
 export const USER_REPOSITORY = Symbol("USER_REPOSITORY");

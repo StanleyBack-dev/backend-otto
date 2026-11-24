@@ -12,7 +12,7 @@ import {
 
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
-const TIMEOUT_MS = 8_000;
+const TIMEOUT_MS = 6_000;
 
 const CURRENT = [
   "temperature_2m",
@@ -119,14 +119,30 @@ export class OpenMeteoAdapter implements WeatherProviderPort {
     }));
   }
 
+  // One retry for a slow or failing moment of the service (it happens), never
+  // for a bad request. Both attempts fit well inside the 60 s function.
   private async get<T>(url: string): Promise<T> {
+    try {
+      return await this.getOnce<T>(url);
+    } catch (error) {
+      if (error instanceof WeatherProviderError && !error.retryable)
+        throw error;
+      return this.getOnce<T>(url);
+    }
+  }
+
+  private async getOnce<T>(url: string): Promise<T> {
     let response: Response;
     try {
       response = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
     } catch (error) {
       throw new WeatherProviderError(
         `Open-Meteo unreachable: ${error instanceof Error ? error.message : "unknown"}`,
+        true,
       );
+    }
+    if (response.status >= 500) {
+      throw new WeatherProviderError(`Open-Meteo ${response.status}`, true);
     }
     const body = (await response.json().catch(() => null)) as
       (T & { error?: boolean; reason?: string }) | null;

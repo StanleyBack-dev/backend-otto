@@ -18,3 +18,9 @@ export type Credential = {
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
+
+/** The name as stored: trimmed, single spaces, 2–120 characters, or null. */
+export function normalizeName(name: string): string | null {
+  const value = name.trim().replace(/\s+/g, " ");
+  return value.length >= 2 && value.length <= 120 ? value : null;
+}
