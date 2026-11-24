@@ -3,12 +3,14 @@ name: Routines
 # Scheduled calls to the API's internal routes (Vercel Hobby has no crons).
 # They authenticate with CRON_SECRET; until the API is deployed and the
 # secrets API_URL / CRON_SECRET exist, every run is skipped.
-#   - maintenance: deletes system logs and signed-out devices past their
-#     retention.
+#   - news: reads the followed feeds three times a day;
+#   - maintenance: deletes system logs, signed-out devices and headlines past
+#     their retention.
 on:
   schedule:
     # GitHub may start scheduled runs a few minutes late; that is fine here.
     - cron: "30 6 * * *" # 03:30 in Brasília time
+    - cron: "0 9,15,21 * * *" # 06:00, 12:00 and 18:00 in Brasília time
   workflow_dispatch:
 
 permissions:
@@ -37,8 +39,15 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Collect the news
+        if: steps.ready.outputs.ready == 'true' && (github.event.schedule != '30 6 * * *')
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -X POST -H "Authorization: Bearer $CRON_SECRET" \
+            "$API_URL/internal/news/collect"
+
       - name: Clean up old data
-        if: steps.ready.outputs.ready == 'true'
+        if: steps.ready.outputs.ready == 'true' && (github.event.schedule == '30 6 * * *' || github.event_name == 'workflow_dispatch')
         run: |
           curl --fail-with-body --silent --show-error --max-time 120 \
             -X POST -H "Authorization: Bearer $CRON_SECRET" \
@@ -46,3 +55,6 @@ jobs:
           curl --fail-with-body --silent --show-error --max-time 120 \
             -X POST -H "Authorization: Bearer $CRON_SECRET" \
             "$API_URL/internal/identity/cleanup"
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -X POST -H "Authorization: Bearer $CRON_SECRET" \
+            "$API_URL/internal/news/cleanup"

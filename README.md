@@ -71,6 +71,60 @@ CI fails if the file is outdated (`npm run schema:check`).
   location (`updateMyLocation`, reported by the device or typed) live in
   `tb_user_settings`. Weather and the briefing read the last known location.
 
+## Assistant
+
+- `ask(text, conversationId?)` sends the question (typed or transcribed) with
+  the last messages of the conversation and the owner settings (name,
+  language, time zone, place) to the AI model, behind `LlmPort`.
+- **Gemini** (Google AI Studio, REST `generateContent`) today:
+  `GEMINI_API_KEY` and `GEMINI_MODEL` (check which models the free tier
+  covers in AI Studio). Another provider is a new adapter.
+- **Tools**: feature modules register an `AssistantTool` in the
+  `AssistantToolRegistry` (weather, agenda, news); the model calls them and
+  a failing tool never breaks the answer.
+- Only the text turns are stored (`tb_conversations`, `tb_messages`), and
+  only when the answer exists. `myConversations` and
+  `conversationMessages` are paged.
+
+## Weather
+
+- **Open-Meteo** (free for non-commercial use, no key; data CC BY 4.0,
+  places from GeoNames).
+- The assistant tool `get_weather` answers "qual o clima agora?", "vai
+  chover amanhã?" and "e em Lisboa?": without a place it uses the last saved
+  location, so moving only changes the settings.
+- `weather(place?, days?)` for the app weather card; `searchPlaces(name)`
+  to pick a city, then `updateMyLocation` saves it.
+- Forecasts are cached in memory for 10 minutes (~1 km grid).
+
+## Agenda
+
+- Google Calendar through the owner's **Apps Script web app**
+  (`integrations/google-apps-script/otto-agenda.gs`, install steps at the
+  top of the file). It runs as the owner, so there is no Google Cloud OAuth
+  to renew; `AGENDA_SCRIPT_TOKEN` is the credential and
+  `AGENDA_SCRIPT_URL` the `/exec` URL. Changing accounts is publishing the
+  script there and changing both variables.
+- The assistant tool `get_agenda` answers "o que tenho hoje?", "qual o
+  próximo compromisso?", "e amanhã?" with local times in the owner's time
+  zone, plus what is happening now and the next event.
+- `agenda(date?, days?)` for the app agenda screen (up to 7 days, cached
+  for 2 minutes).
+
+## News
+
+- The owner chooses the **RSS/Atom feeds** (`addNewsSource`,
+  `updateNewsSource`, `removeNewsSource`, up to 30) with a free category
+  ("geral", "tecnologia", "Goiânia"…). Nothing is fixed in the code;
+  `suggestedNewsSources` only helps to start. A feed is read when added, so
+  a wrong link is refused at once; only public http(s) addresses are
+  accepted.
+- The **Routines** workflow calls `/internal/news/collect` at 06:00, 12:00
+  and 18:00 (Brasília) and `/internal/news/cleanup` daily (headlines older
+  than 14 days). Stale sources (6 h) are also refreshed before answering.
+- The assistant tool `get_news` answers "quais as notícias de hoje/ontem?",
+  optionally by category; `news(period, category, page)` is paged for the app.
+
 ## Database
 
 PostgreSQL on **Neon** through TypeORM. The schema only changes through

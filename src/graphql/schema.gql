@@ -2,6 +2,83 @@
 # GENERATED FILE (npm run schema:generate) — do not edit
 # ------------------------------------------------------
 
+type AgendaEventOutput {
+  id: ID!
+  title: String!
+  start: DateTime!
+  end: DateTime!
+  allDay: Boolean!
+  location: String
+  description: String
+
+  """Agenda do evento (ex.: Rotina de Estudos)."""
+  calendar: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type AgendaOutput {
+  """Primeiro dia (YYYY-MM-DD)."""
+  from: String!
+
+  """Último dia (YYYY-MM-DD)."""
+  to: String!
+  timeZone: String!
+  events: [AgendaEventOutput!]!
+}
+
+type ConversationOutput {
+  id: ID!
+  title: String!
+  createdAt: DateTime!
+
+  """Último uso."""
+  updatedAt: DateTime!
+}
+
+type ConversationPage {
+  items: [ConversationOutput!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  totalPages: Int!
+}
+
+type MessageOutput {
+  id: ID!
+  role: MessageRole!
+  text: String!
+  createdAt: DateTime!
+}
+
+"""Quem disse a mensagem."""
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+type MessagePage {
+  items: [MessageOutput!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  totalPages: Int!
+}
+
+type AskResultOutput {
+  conversation: ConversationOutput!
+  question: MessageOutput!
+
+  """A resposta, pronta para falar."""
+  answer: MessageOutput!
+
+  """Ferramentas consultadas (clima, agenda…)."""
+  toolsUsed: [String!]!
+}
+
 type AuthTokensOutput {
   """O dispositivo (sessão) desta conexão."""
   deviceId: ID!
@@ -12,11 +89,6 @@ type AuthTokensOutput {
   refreshToken: String!
   refreshTokenExpiresAt: DateTime!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type MeOutput {
   id: ID!
@@ -67,9 +139,102 @@ type SettingsOutput {
   wakeWordEnabled: Boolean!
 }
 
+type NewsItemOutput {
+  id: ID!
+  title: String!
+  link: String!
+  summary: String
+  publishedAt: DateTime!
+  sourceName: String!
+  category: String!
+}
+
+type NewsItemPage {
+  items: [NewsItemOutput!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  totalPages: Int!
+}
+
+type NewsSourceOutput {
+  id: ID!
+  name: String!
+  url: String!
+  category: String!
+  active: Boolean!
+  lastFetchedAt: DateTime
+
+  """Erro da última leitura (null: leu bem)."""
+  lastError: String
+}
+
+type SuggestedNewsSourceOutput {
+  name: String!
+  url: String!
+  category: String!
+}
+
+type PlaceOutput {
+  name: String!
+
+  """Estado e país, ex.: Goiás, Brasil."""
+  region: String
+  countryCode: String
+  latitude: Float!
+  longitude: Float!
+
+  """Fuso IANA."""
+  timeZone: String
+}
+
+type CurrentWeatherOutput {
+  """Hora local da medição (ISO 8601)."""
+  time: String!
+  temperatureC: Float!
+  feelsLikeC: Float!
+  humidityPercent: Float!
+  precipitationMm: Float!
+  windKmh: Float!
+  isDay: Boolean!
+
+  """Código WMO da condição."""
+  weatherCode: Int!
+}
+
+type DailyForecastOutput {
+  """YYYY-MM-DD no fuso do lugar."""
+  date: String!
+  minC: Float!
+  maxC: Float!
+  precipitationChancePercent: Float
+  precipitationMm: Float!
+  weatherCode: Int!
+}
+
+type WeatherOutput {
+  place: String!
+  timeZone: String!
+  current: CurrentWeatherOutput!
+  days: [DailyForecastOutput!]!
+}
+
 type Query {
   """Verifica se a API GraphQL responde."""
   ping: String!
+
+  """Compromissos de um ou mais dias (padrão: hoje)."""
+  agenda(
+    """YYYY-MM-DD"""
+    date: String
+    days: Int
+  ): AgendaOutput!
+
+  """Conversas, da mais recente para a mais antiga."""
+  myConversations(page: PageInput): ConversationPage!
+
+  """Mensagens de uma conversa."""
+  conversationMessages(conversationId: ID!, page: PageInput): MessagePage!
 
   """Quem está conectado."""
   me: MeOutput!
@@ -79,9 +244,40 @@ type Query {
 
   """Preferências do assistente."""
   mySettings: SettingsOutput!
+
+  """Manchetes das suas fontes, da mais nova para a mais antiga."""
+  news(period: NewsPeriod, category: String, page: PageInput): NewsItemPage!
+
+  """Fontes que você segue."""
+  newsSources: [NewsSourceOutput!]!
+
+  """Sugestões de feeds para começar."""
+  suggestedNewsSources: [SuggestedNewsSourceOutput!]!
+
+  """Clima agora e previsão; sem `place`, na sua localização."""
+  weather(place: String, days: Int): WeatherOutput!
+
+  """Busca cidades pelo nome (para escolher a localização)."""
+  searchPlaces(name: String!): [PlaceOutput!]!
+}
+
+input PageInput {
+  page: Int! = 1
+  limit: Int! = 20
+}
+
+"""Hoje (desde a meia-noite), ontem ou as últimas 24 horas."""
+enum NewsPeriod {
+  TODAY
+  YESTERDAY
+  RECENT
 }
 
 type Mutation {
+  """Faz uma pergunta ao assistente."""
+  ask(input: AskInput!): AskResultOutput!
+  deleteConversation(conversationId: ID!): Boolean!
+
   """Conecta um dispositivo à conta."""
   login(input: LoginInput!): AuthTokensOutput!
 
@@ -101,6 +297,19 @@ type Mutation {
 
   """Atualiza a localização usada no clima e no resumo do dia."""
   updateMyLocation(input: UpdateLocationInput!): SettingsOutput!
+
+  """Segue um feed RSS/Atom (o endereço é conferido na hora)."""
+  addNewsSource(input: AddNewsSourceInput!): NewsSourceOutput!
+  updateNewsSource(input: UpdateNewsSourceInput!): NewsSourceOutput!
+  removeNewsSource(id: ID!): Boolean!
+}
+
+input AskInput {
+  """A pergunta, digitada ou transcrita da voz."""
+  text: String!
+
+  """Continua uma conversa; sem ele, começa uma nova."""
+  conversationId: ID
 }
 
 input LoginInput {
@@ -148,4 +357,24 @@ input UpdateLocationInput {
 
   """Fuso IANA do dispositivo; quando enviado, passa a valer."""
   timeZone: String
+}
+
+input AddNewsSourceInput {
+  """Endereço do feed RSS ou Atom."""
+  url: String!
+
+  """Ex.: geral, tecnologia, economia, Goiânia."""
+  category: String!
+
+  """Sem ele, usa o título do feed."""
+  name: String
+}
+
+input UpdateNewsSourceInput {
+  id: ID!
+  name: String
+  category: String
+
+  """false pausa a coleta da fonte."""
+  active: Boolean
 }
