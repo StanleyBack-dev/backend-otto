@@ -5,6 +5,7 @@ import { AssistantToolRegistry } from "@/modules/assistant/application/assistant
 import { CONVERSATION_REPOSITORY } from "@/modules/assistant/application/ports/conversation-repository.port";
 import { LLM } from "@/modules/assistant/application/ports/llm.port";
 import { AskAssistantUseCase } from "@/modules/assistant/application/use-cases/ask-assistant.use-case";
+import { AskByVoiceUseCase } from "@/modules/assistant/application/use-cases/ask-by-voice.use-case";
 import { MyConversationsUseCase } from "@/modules/assistant/application/use-cases/my-conversations.use-case";
 import { GeminiLlmAdapter } from "@/modules/assistant/infrastructure/llm/gemini-llm.adapter";
 import { ConversationOrmEntity } from "@/modules/assistant/infrastructure/persistence/entities/conversation.orm-entity";
@@ -24,6 +25,7 @@ import { IdentityModule } from "@/modules/identity/identity.module";
     AssistantConfig,
     AssistantToolRegistry,
     AskAssistantUseCase,
+    AskByVoiceUseCase,
     MyConversationsUseCase,
     AssistantResolver,
     { provide: LLM, useClass: GeminiLlmAdapter },

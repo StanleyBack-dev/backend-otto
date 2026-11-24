@@ -22,4 +22,14 @@ export const assistantErrors = {
     status: HttpStatus.SERVICE_UNAVAILABLE,
     message: "Não consegui pensar numa resposta agora. Tente de novo.",
   },
+  invalidAudio: {
+    code: "ASSISTANT_INVALID_AUDIO",
+    status: HttpStatus.BAD_REQUEST,
+    message: ({ reason }: { reason: string }) => reason,
+  },
+  noSpeech: {
+    code: "ASSISTANT_NO_SPEECH",
+    status: HttpStatus.BAD_REQUEST,
+    message: "Não entendi o que você disse. Fale de novo, por favor.",
+  },
 } as const;

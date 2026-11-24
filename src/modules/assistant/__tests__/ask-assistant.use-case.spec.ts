@@ -66,7 +66,7 @@ class InMemoryConversations implements ConversationRepositoryPort {
   pageMessages = () => Promise.reject(new Error("unused"));
 }
 
-function setup(llm: LlmPort) {
+function setup(llm: Pick<LlmPort, "chat">) {
   const conversations = new InMemoryConversations();
   const tools = new AssistantToolRegistry();
   const settings = {
@@ -83,7 +83,7 @@ function setup(llm: LlmPort) {
   } as unknown as MySettingsUseCase;
   const config = { historyMessages: 12, maxToolRounds: 4 } as AssistantConfig;
   const useCase = new AskAssistantUseCase(
-    llm,
+    { transcribe: jest.fn(), ...llm },
     conversations,
     { now: () => NOW },
     tools,

@@ -86,6 +86,16 @@ CI fails if the file is outdated (`npm run schema:check`).
   only when the answer exists. `myConversations` and
   `conversationMessages` are paged.
 
+## Voice
+
+- `askByVoice(audioBase64, mimeType, conversationId?)`: a short recording
+  (WAV/OGG/MP3/FLAC/AAC, up to 2 MB ≈ 60 s of 16 kHz mono WAV) is transcribed
+  by the AI model in the owner's language (`LlmPort.transcribe`) and asked
+  like a typed question; `question.text` returns the transcript.
+- Silent PCM WAV is refused before calling the model (saves quota); the model
+  answers `[no-speech]` for noise; unreadable audio returns
+  `ASSISTANT_INVALID_AUDIO`.
+
 ## Weather
 
 - **Open-Meteo** (free for non-commercial use, no key; data CC BY 4.0,

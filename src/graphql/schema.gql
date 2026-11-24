@@ -311,6 +311,9 @@ enum NewsPeriod {
 type Mutation {
   """Faz uma pergunta ao assistente."""
   ask(input: AskInput!): AskResultOutput!
+
+  """Pergunta falada: o áudio é transcrito (question.text) e respondido."""
+  askByVoice(input: AskByVoiceInput!): AskResultOutput!
   deleteConversation(conversationId: ID!): Boolean!
 
   """Refaz o resumo de hoje com os dados atuais."""
@@ -345,6 +348,17 @@ type Mutation {
 input AskInput {
   """A pergunta, digitada ou transcrita da voz."""
   text: String!
+
+  """Continua uma conversa; sem ele, começa uma nova."""
+  conversationId: ID
+}
+
+input AskByVoiceInput {
+  """A gravação da pergunta, em base64."""
+  audioBase64: String!
+
+  """Ex.: audio/wav, audio/ogg."""
+  mimeType: String!
 
   """Continua uma conversa; sem ele, começa uma nova."""
   conversationId: ID
