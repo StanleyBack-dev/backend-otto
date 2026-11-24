@@ -1,3 +1,5 @@
+import type { AskResult } from "@/modules/assistant/application/use-cases/ask-assistant.use-case";
+import type { AskResultOutput } from "@/modules/assistant/presentation/graphql/dto/outputs/ask-result.output";
 import type {
   Conversation,
   Message,
@@ -22,5 +24,14 @@ export function toMessageOutput(message: Message): MessageOutput {
     role: message.role,
     text: message.text,
     createdAt: message.createdAt,
+  };
+}
+
+export function toAskResultOutput(result: AskResult): AskResultOutput {
+  return {
+    conversation: toConversationOutput(result.conversation),
+    question: toMessageOutput(result.question),
+    answer: toMessageOutput(result.answer),
+    toolsUsed: result.toolsUsed,
   };
 }
