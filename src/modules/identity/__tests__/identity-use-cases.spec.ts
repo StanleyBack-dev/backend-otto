@@ -35,6 +35,10 @@ class InMemoryUsers implements UserRepositoryPort {
       [...this.users.values()].find((u) => u.email === email) ?? null,
     );
   count = () => Promise.resolve(this.users.size);
+  activeIds = () =>
+    Promise.resolve(
+      [...this.users.values()].filter((u) => u.active).map((u) => u.id),
+    );
   create(user: Pick<User, "name" | "email">, passwordHash: string) {
     const created: User = {
       ...user,

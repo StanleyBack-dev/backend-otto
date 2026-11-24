@@ -4,6 +4,8 @@ export interface UserRepositoryPort {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   count(): Promise<number>;
+  /** Ids of the active accounts (the scheduled routines). */
+  activeIds(): Promise<string[]>;
   create(
     user: Pick<User, "name" | "email">,
     passwordHash: string,

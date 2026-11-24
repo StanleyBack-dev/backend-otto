@@ -40,4 +40,10 @@ export class SettingsOutput {
 
   @Field()
   wakeWordEnabled!: boolean;
+
+  @Field()
+  briefingEnabled!: boolean;
+
+  @Field({ description: "Hora local do resumo (HH:mm)." })
+  briefingTime!: string;
 }

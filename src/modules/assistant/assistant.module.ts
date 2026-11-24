@@ -32,6 +32,6 @@ import { IdentityModule } from "@/modules/identity/identity.module";
       useClass: ConversationTypeormRepository,
     },
   ],
-  exports: [AssistantToolRegistry],
+  exports: [AssistantToolRegistry, LLM],
 })
 export class AssistantModule {}

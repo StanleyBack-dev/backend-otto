@@ -34,6 +34,8 @@ export class SettingsTypeormRepository implements SettingsRepositoryPort {
       speechRate: Number(row.speechRate),
       autoSpeak: row.autoSpeak,
       wakeWordEnabled: row.wakeWordEnabled,
+      briefingEnabled: row.briefingEnabled,
+      briefingTime: row.briefingTime,
     };
   }
 
@@ -51,6 +53,8 @@ export class SettingsTypeormRepository implements SettingsRepositoryPort {
         speechRate: settings.speechRate.toString(),
         autoSpeak: settings.autoSpeak,
         wakeWordEnabled: settings.wakeWordEnabled,
+        briefingEnabled: settings.briefingEnabled,
+        briefingTime: settings.briefingTime,
       },
       ["userId"],
     );

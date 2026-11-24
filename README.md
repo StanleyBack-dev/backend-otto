@@ -125,6 +125,20 @@ CI fails if the file is outdated (`npm run schema:check`).
 - The assistant tool `get_news` answers "quais as notícias de hoje/ontem?",
   optionally by category; `news(period, category, page)` is paged for the app.
 
+## Morning briefing
+
+- Agenda of the day + weather + yesterday's headlines, written by the AI
+  model to be read aloud (a plain template is used when the model is down;
+  a failing section is mentioned, never blocks the rest). One per owner and
+  local date (`tb_briefings`).
+- The time is a setting (`briefingTime`, default 07:00, `briefingEnabled`).
+  The **Routines** workflow calls `/internal/briefing/run` hourly and
+  prepares it from one hour before that time, in the owner's time zone;
+  `/internal/briefing/cleanup` keeps 30 days.
+- `todayBriefing` (generated on demand if the routine has not run yet),
+  `regenerateBriefing` and the paged `myBriefings`; the assistant tool
+  `get_briefing` answers "bom dia" and "qual o resumo de hoje?".
+
 ## Database
 
 PostgreSQL on **Neon** through TypeORM. The schema only changes through

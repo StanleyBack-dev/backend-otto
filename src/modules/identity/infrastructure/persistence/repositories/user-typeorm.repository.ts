@@ -37,6 +37,14 @@ export class UserTypeormRepository implements UserRepositoryPort {
     return this.users.count();
   }
 
+  async activeIds(): Promise<string[]> {
+    const rows = await this.users.find({
+      where: { active: true },
+      select: { id: true },
+    });
+    return rows.map((row) => row.id);
+  }
+
   async create(
     user: Pick<User, "name" | "email">,
     passwordHash: string,
