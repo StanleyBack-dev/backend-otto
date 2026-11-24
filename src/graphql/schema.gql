@@ -330,6 +330,9 @@ type Mutation {
 
   """Troca a senha e desconecta os outros dispositivos."""
   changeMyPassword(input: ChangePasswordInput!): Boolean!
+
+  """Muda o seu nome (como o assistente chama você)."""
+  updateMyProfile(input: UpdateProfileInput!): MeOutput!
   renameDevice(input: RenameDeviceInput!): DeviceOutput!
 
   """Desconecta um dispositivo (ex.: celular antigo)."""
@@ -380,6 +383,11 @@ input RefreshSessionInput {
 input ChangePasswordInput {
   currentPassword: String!
   newPassword: String!
+}
+
+input UpdateProfileInput {
+  """Como o assistente chama você."""
+  name: String!
 }
 
 input RenameDeviceInput {

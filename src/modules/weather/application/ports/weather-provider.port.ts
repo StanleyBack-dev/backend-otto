@@ -5,7 +5,11 @@ import type {
 } from "@/modules/weather/domain/weather";
 
 export class WeatherProviderError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    /** Timeout, network or server error: worth one more try. */
+    readonly retryable = false,
+  ) {
     super(message);
     this.name = "WeatherProviderError";
   }
