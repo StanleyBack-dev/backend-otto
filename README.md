@@ -111,6 +111,20 @@ CI fails if the file is outdated (`npm run schema:check`).
 - `agenda(date?, days?)` for the app agenda screen (up to 7 days, cached
   for 2 minutes).
 
+## News
+
+- The owner chooses the **RSS/Atom feeds** (`addNewsSource`,
+  `updateNewsSource`, `removeNewsSource`, up to 30) with a free category
+  ("geral", "tecnologia", "Goiânia"…). Nothing is fixed in the code;
+  `suggestedNewsSources` only helps to start. A feed is read when added, so
+  a wrong link is refused at once; only public http(s) addresses are
+  accepted.
+- The **Routines** workflow calls `/internal/news/collect` at 06:00, 12:00
+  and 18:00 (Brasília) and `/internal/news/cleanup` daily (headlines older
+  than 14 days). Stale sources (6 h) are also refreshed before answering.
+- The assistant tool `get_news` answers "quais as notícias de hoje/ontem?",
+  optionally by category; `news(period, category, page)` is paged for the app.
+
 ## Database
 
 PostgreSQL on **Neon** through TypeORM. The schema only changes through
