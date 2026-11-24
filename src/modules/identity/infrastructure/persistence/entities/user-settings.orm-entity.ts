@@ -41,6 +41,12 @@ export class UserSettingsOrmEntity {
   @Column({ name: "wake_word_enabled", type: "boolean" })
   wakeWordEnabled!: boolean;
 
+  @Column({ name: "briefing_enabled", type: "boolean" })
+  briefingEnabled!: boolean;
+
+  @Column({ name: "briefing_time", type: "varchar", length: 5 })
+  briefingTime!: string;
+
   @UpdateDateColumn({ name: "updated_at", type: "timestamptz" })
   updatedAt!: Date;
 }

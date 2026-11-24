@@ -77,6 +77,22 @@ describe("settings", () => {
     expect(next.assistantName).toBe("Otto");
   });
 
+  it("accepts a valid briefing time and refuses an invalid one", () => {
+    expect(
+      applySettingsChange(DEFAULT_SETTINGS, { briefingTime: "06:30" })
+        .briefingTime,
+    ).toBe("06:30");
+    expect(
+      applySettingsChange(DEFAULT_SETTINGS, { briefingTime: "23:59" })
+        .briefingTime,
+    ).toBe("23:59");
+    for (const briefingTime of ["24:00", "7:00", "06:60", "ab:cd"]) {
+      expect(() =>
+        applySettingsChange(DEFAULT_SETTINGS, { briefingTime }),
+      ).toThrow(InvalidSettingsError);
+    }
+  });
+
   it("rejects invalid values", () => {
     expect(() =>
       applySettingsChange(DEFAULT_SETTINGS, { timeZone: "Mars/Base" }),

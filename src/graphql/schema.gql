@@ -79,6 +79,31 @@ type AskResultOutput {
   toolsUsed: [String!]!
 }
 
+type BriefingOutput {
+  id: ID!
+
+  """Data local (YYYY-MM-DD)."""
+  date: String!
+
+  """Texto pronto para falar."""
+  text: String!
+
+  """false: escrito sem a IA (modelo indisponível)."""
+  writtenByModel: Boolean!
+
+  """Partes que não puderam ser lidas (agenda, weather, news)."""
+  unavailable: [String!]!
+  createdAt: DateTime!
+}
+
+type BriefingPage {
+  items: [BriefingOutput!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+  totalPages: Int!
+}
+
 type AuthTokensOutput {
   """O dispositivo (sessão) desta conexão."""
   deviceId: ID!
@@ -137,6 +162,10 @@ type SettingsOutput {
   speechRate: Float!
   autoSpeak: Boolean!
   wakeWordEnabled: Boolean!
+  briefingEnabled: Boolean!
+
+  """Hora local do resumo (HH:mm)."""
+  briefingTime: String!
 }
 
 type NewsItemOutput {
@@ -236,6 +265,12 @@ type Query {
   """Mensagens de uma conversa."""
   conversationMessages(conversationId: ID!, page: PageInput): MessagePage!
 
+  """Resumo de hoje (gerado na hora se a rotina ainda não preparou)."""
+  todayBriefing: BriefingOutput!
+
+  """Resumos anteriores."""
+  myBriefings(page: PageInput): BriefingPage!
+
   """Quem está conectado."""
   me: MeOutput!
 
@@ -277,6 +312,9 @@ type Mutation {
   """Faz uma pergunta ao assistente."""
   ask(input: AskInput!): AskResultOutput!
   deleteConversation(conversationId: ID!): Boolean!
+
+  """Refaz o resumo de hoje com os dados atuais."""
+  regenerateBriefing: BriefingOutput!
 
   """Conecta um dispositivo à conta."""
   login(input: LoginInput!): AuthTokensOutput!
@@ -346,6 +384,12 @@ input UpdateSettingsInput {
   speechRate: Float
   autoSpeak: Boolean
   wakeWordEnabled: Boolean
+
+  """Prepara o resumo do dia."""
+  briefingEnabled: Boolean
+
+  """Hora local do resumo (HH:mm)."""
+  briefingTime: String
 }
 
 input UpdateLocationInput {

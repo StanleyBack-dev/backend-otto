@@ -22,6 +22,10 @@ export type UserSettings = {
   autoSpeak: boolean;
   /** The desktop app listens for the assistant's name. */
   wakeWordEnabled: boolean;
+  /** Prepares the morning briefing every day. */
+  briefingEnabled: boolean;
+  /** Local time (HH:mm) the briefing should be ready by. */
+  briefingTime: string;
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -32,6 +36,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   speechRate: 1,
   autoSpeak: true,
   wakeWordEnabled: true,
+  briefingEnabled: true,
+  briefingTime: "07:00",
 };
 
 export type SettingsChange = Partial<
@@ -43,6 +49,8 @@ export type SettingsChange = Partial<
     | "speechRate"
     | "autoSpeak"
     | "wakeWordEnabled"
+    | "briefingEnabled"
+    | "briefingTime"
   >
 >;
 
@@ -54,6 +62,10 @@ export type LocationChange = {
 };
 
 export class InvalidSettingsError extends Error {}
+
+export function isValidClockTime(value: string): boolean {
+  return /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value);
+}
 
 export function isValidTimeZone(timeZone: string): boolean {
   try {
@@ -110,6 +122,17 @@ export function applySettingsChange(
   if (change.autoSpeak !== undefined) next.autoSpeak = change.autoSpeak;
   if (change.wakeWordEnabled !== undefined) {
     next.wakeWordEnabled = change.wakeWordEnabled;
+  }
+  if (change.briefingEnabled !== undefined) {
+    next.briefingEnabled = change.briefingEnabled;
+  }
+  if (change.briefingTime !== undefined) {
+    if (!isValidClockTime(change.briefingTime)) {
+      throw new InvalidSettingsError(
+        "O horário do resumo deve estar no formato HH:mm, ex.: 07:00.",
+      );
+    }
+    next.briefingTime = change.briefingTime;
   }
   return next;
 }

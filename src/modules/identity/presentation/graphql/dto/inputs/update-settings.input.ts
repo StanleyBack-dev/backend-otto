@@ -42,4 +42,15 @@ export class UpdateSettingsInput {
   @IsOptional()
   @IsBoolean()
   wakeWordEnabled?: boolean;
+
+  @Field({ nullable: true, description: "Prepara o resumo do dia." })
+  @IsOptional()
+  @IsBoolean()
+  briefingEnabled?: boolean;
+
+  @Field({ nullable: true, description: "Hora local do resumo (HH:mm)." })
+  @IsOptional()
+  @IsString()
+  @Length(5, 5)
+  briefingTime?: string;
 }

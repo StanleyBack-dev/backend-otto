@@ -8,6 +8,7 @@ import { SECRETS } from "@/modules/identity/application/ports/secrets.port";
 import { SETTINGS_REPOSITORY } from "@/modules/identity/application/ports/settings-repository.port";
 import { USER_REPOSITORY } from "@/modules/identity/application/ports/user-repository.port";
 import { SessionTokensService } from "@/modules/identity/application/session-tokens.service";
+import { ActiveUsersUseCase } from "@/modules/identity/application/use-cases/active-users.use-case";
 import { AuthenticateUseCase } from "@/modules/identity/application/use-cases/authenticate.use-case";
 import { BootstrapOwnerUseCase } from "@/modules/identity/application/use-cases/bootstrap-owner.use-case";
 import { ChangeOwnPasswordUseCase } from "@/modules/identity/application/use-cases/change-own-password.use-case";
@@ -45,6 +46,7 @@ import { InternalIdentityController } from "@/modules/identity/presentation/http
   providers: [
     IdentityConfig,
     SessionTokensService,
+    ActiveUsersUseCase,
     AuthenticateUseCase,
     BootstrapOwnerUseCase,
     ChangeOwnPasswordUseCase,
@@ -64,7 +66,7 @@ import { InternalIdentityController } from "@/modules/identity/presentation/http
     { provide: ACCESS_TOKEN, useClass: JwtAccessTokenService },
     { provide: SECRETS, useClass: NodeSecrets },
   ],
-  exports: [UserSessionGuard, MySettingsUseCase],
+  exports: [UserSessionGuard, MySettingsUseCase, ActiveUsersUseCase],
 })
 export class IdentityModule implements OnApplicationBootstrap {
   constructor(private readonly bootstrapOwner: BootstrapOwnerUseCase) {}
